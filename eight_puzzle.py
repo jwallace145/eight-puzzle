@@ -4,7 +4,7 @@ from numpy import random  # random module used to generate permutations of lists
 
 # board state represented as a list
 # 0 represents the empty tile and -1 represents the boundaries of the puzzle
-board_state = [8, 3, 7, 1, 0, 4, 6, 5, 2, -1]
+board_state = [0, 1, 2, 3, 4, 5, 6, 7, 8, -1]
 
 # dictionary to represent coordinate positions of the index of the board state array
 index_to_coordinates = {
@@ -200,9 +200,9 @@ def bfs(state):
 
 # main
 def main():
-    # print('EIGHT PUZZLE AI')
-    # print('---------------')
-    # print('developed by: Jimmy Wallace')
+    print('EIGHT PUZZLE AI')
+    print('---------------')
+    print('developed by: Jimmy Wallace')
     #
     # print_board(board_state)
     # print(count_inversions(board_state))
@@ -214,16 +214,35 @@ def main():
     #
     # print(bfs(board_state))
 
+    print('\ninstructions:')
+    print('enter in a tile number to move that tile number into the empty space')
+    print('enter in \"ai help\" to have the ai return the tile sequence to solve the puzzle')
+    print('enter in \"randomize\" to randomize the puzzle')
+
+    randomize_board(board_state)
     while True:
         print_board(board_state)
 
         if count_inversions(board_state) == 0:
-            print('you won!')
+            print('puzzle solved!')
             break
 
-        tile = input('tile to move: ')
+        user_input = input('input: ')
 
-        move_tile(board_state, int(tile))
+        try:
+            tile = int(user_input)
+            move_tile(board_state, tile)
+        except ValueError:
+            if user_input == 'ai help':
+                print('ai help: enter the sequence of tiles below to solve the puzzle')
+                print(bfs(board_state))
+            elif user_input == 'randomize':
+                randomize_board(board_state)
+            else:
+                print('invalid input')
+
+
+
 
 
 if __name__ == "__main__":

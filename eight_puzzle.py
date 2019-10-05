@@ -158,7 +158,7 @@ def get_successors(state):
         state_copy = state.copy()
         move_tile(state_copy, tile)
 
-        successors.append(state_copy)
+        successors.append((state_copy, tile))
 
     return successors
 
@@ -166,8 +166,9 @@ def get_successors(state):
 # bfs search to find the next best move
 def bfs(state):
     fringe = deque()
+    parents = {}
     visited = set()
-
+    
     fringe.append(state)
     while len(fringe) != 0:
         s = fringe.popleft()
@@ -178,14 +179,18 @@ def bfs(state):
             break
 
         for successor in get_successors(s):
-            if tuple(successor) not in visited:
-                fringe.append(successor)
+            if tuple(successor[0]) not in visited:
+                fringe.append(successor[0])
 
     return 1
 
 
 # main
 def main():
+    print('EIGHT PUZZLE AI')
+    print('---------------')
+    print('developed by: Jimmy Wallace')
+
     print_board(board_state)
     print(count_inversions(board_state))
 

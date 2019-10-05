@@ -183,14 +183,14 @@ def get_successors(state):
 
 
 # bfs search to find the next best move
-def bfs(state):
+def bfs(initial_state):
     fringe = deque()  # data structure used to implement bfs
     parents = {}  # parent dictionary containing the parent of each state and the move taken to get to that state
     visited = set()  # visited set to store the visited states to aid in avoiding unnecessary cylces
 
-    fringe.append(state)  # append the starting state
-    parents[tuple(state)] = None  # the starting state has no parents
-    visited.add(tuple(state))  # add the starting state to the visited set
+    fringe.append(initial_state)  # append the starting state
+    parents[tuple(initial_state)] = None  # the starting state has no parents
+    visited.add(tuple(initial_state))  # add the starting state to the visited set
     while len(fringe) != 0:
         state = fringe.popleft()  # pop a state from the fringe
 
@@ -202,10 +202,9 @@ def bfs(state):
             tiles = []
             while parents[tuple(state)] is not None:
                 tiles.append(parents[tuple(state)][1])
-                s = parents[tuple(state)][0]
+                state = parents[tuple(state)][0]
 
             return tiles[::-1]
-            break
 
         # expand the nodes of every successor
         for successor in get_successors(state):
@@ -214,7 +213,7 @@ def bfs(state):
             # if the successor state has not been visited, add it to the fringe, parents dictionary, and visited set
             if tuple(successor_state) not in visited:
                 fringe.append(successor_state)
-                parents[tuple(successor_state)] = (tuple(successor_state), tile)
+                parents[tuple(successor_state)] = (tuple(state), tile)
                 visited.add(tuple(successor_state))
 
 

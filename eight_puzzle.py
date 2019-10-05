@@ -4,7 +4,7 @@ from numpy import random  # random module used to generate permutations of lists
 
 # board state represented as a list
 # 0 represents the empty tile and -1 represents the boundaries of the puzzle
-board_state = [4, 6, 3, 0, 7, 1, 8, 2, 5, -1]
+board_state = [8, 3, 7, 1, 0, 4, 6, 5, 2, -1]
 
 # dictionary to represent coordinate positions of the index of the board state array
 index_to_coordinates = {
@@ -168,38 +168,62 @@ def bfs(state):
     fringe = deque()
     parents = {}
     visited = set()
-    
+
     fringe.append(state)
+    parents[tuple(state)] = None
+    visited.add(tuple(state))
     while len(fringe) != 0:
         s = fringe.popleft()
-        visited.add(tuple(s))
 
         if count_inversions(s) == 0:
             print('we found a goal state!!!!')
+
+            tiles = []
+            while parents[tuple(s)] is not None:
+                tiles.append(parents[tuple(s)][1])
+                s = parents[tuple(s)][0]
+
+            return tiles[::-1]
+
             break
 
         for successor in get_successors(s):
-            if tuple(successor[0]) not in visited:
-                fringe.append(successor[0])
+            ss, tile = successor[0], successor[1]
+
+            if tuple(ss) not in visited:
+                fringe.append(ss)
+                parents[tuple(ss)] = (tuple(s), tile)
+                visited.add(tuple(ss))
 
     return 1
 
 
 # main
 def main():
-    print('EIGHT PUZZLE AI')
-    print('---------------')
-    print('developed by: Jimmy Wallace')
+    # print('EIGHT PUZZLE AI')
+    # print('---------------')
+    # print('developed by: Jimmy Wallace')
+    #
+    # print_board(board_state)
+    # print(count_inversions(board_state))
+    #
+    # randomize_board(board_state)
+    #
+    # print_board(board_state)
+    # print(count_inversions(board_state))
+    #
+    # print(bfs(board_state))
 
-    print_board(board_state)
-    print(count_inversions(board_state))
+    while True:
+        print_board(board_state)
 
-    randomize_board(board_state)
+        if count_inversions(board_state) == 0:
+            print('you won!')
+            break
 
-    print_board(board_state)
-    print(count_inversions(board_state))
+        tile = input('tile to move: ')
 
-    bfs(board_state)
+        move_tile(board_state, int(tile))
 
 
 if __name__ == "__main__":

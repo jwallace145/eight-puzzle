@@ -247,15 +247,16 @@ def a_star(initial_state):
     nodes_expanded = 0
 
     li = []
-    fringe = PriorityQueue()  # data structure used to implement bfs
+    fringe = PriorityQueue()  # data structure used to implement a* search
     parents = {}  # parent dictionary containing the parent of each state and the move taken to get to that state
     visited = set()  # visited set to store the visited states to aid in avoiding unnecessary cycles
 
-    fringe.push((0, initial_state))  # append the starting state
+    # append the starting state as a tuple with the cost of the move as the first element
+    fringe.push((0, initial_state))
     parents[tuple(initial_state)] = None  # the starting state has no parents
     visited.add(tuple(initial_state))  # add the starting state to the visited set
     while not fringe.is_empty():
-        cost, state = fringe.pop()  # pop a state from the fringe
+        cost, state = fringe.pop()  # pop a cost and state from the fringe
 
         if count_inversions(state) == 0:  # if a goal state is achieved
             print('we found a goal state!!!')
@@ -280,6 +281,8 @@ def a_star(initial_state):
             if tuple(successor_state) not in visited:
                 parents[tuple(successor_state)] = (tuple(state), tile)
                 visited.add(tuple(successor_state))
+                # the priority of the state = depth of the state + heuristic value of the state
+                # this priority queue is implemented as a minimum priority queue so low value heuristics are desirable
                 fringe.push((get_depth(successor_state, parents) + heuristic(successor_state), successor_state))
 
 

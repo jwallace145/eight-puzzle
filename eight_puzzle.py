@@ -1,4 +1,5 @@
 # import necessary modules
+from priority_queue import PriorityQueue  # data structure of the fringe for A* search
 from collections import deque  # data structure of the fringe for bfs
 from numpy import random  # random module used to generate permutations of lists for randomizing the puzzle
 
@@ -184,6 +185,8 @@ def get_successors(state):
 
 # bfs search to find the next best move
 def bfs(initial_state):
+    nodes_expanded = 0
+
     fringe = deque()  # data structure used to implement bfs
     parents = {}  # parent dictionary containing the parent of each state and the move taken to get to that state
     visited = set()  # visited set to store the visited states to aid in avoiding unnecessary cylces
@@ -204,17 +207,80 @@ def bfs(initial_state):
                 tiles.append(parents[tuple(state)][1])
                 state = parents[tuple(state)][0]
 
+            print('nodes expanded: ' + str(nodes_expanded))
             return tiles[::-1]
 
         # expand the nodes of every successor
         for successor in get_successors(state):
             successor_state, tile = successor[0], successor[1]
 
+            nodes_expanded += 1
+
             # if the successor state has not been visited, add it to the fringe, parents dictionary, and visited set
             if tuple(successor_state) not in visited:
                 fringe.append(successor_state)
                 parents[tuple(successor_state)] = (tuple(state), tile)
                 visited.add(tuple(successor_state))
+
+
+# heuristic function to be used with A* search
+def heuristic(state):
+    s = 0
+    for i in range(len(state)):
+        if state[i] != 0 and state[i] != -9:
+            s += abs(state[i] - i)
+
+    return s
+
+
+# get depth of the current node
+def get_depth(state, parents):
+    depth = 0
+    while parents[tuple(state)] is not None:
+        state = parents[tuple(state)][0]
+        depth += 1
+
+    return depth
+
+# A* search
+def a_star(initial_state):
+    nodes_expanded = 0
+
+    li = []
+    fringe = PriorityQueue()  # data structure used to implement bfs
+    parents = {}  # parent dictionary containing the parent of each state and the move taken to get to that state
+    visited = set()  # visited set to store the visited states to aid in avoiding unnecessary cycles
+
+    fringe.push((0, initial_state))  # append the starting state
+    parents[tuple(initial_state)] = None  # the starting state has no parents
+    visited.add(tuple(initial_state))  # add the starting state to the visited set
+    while not fringe.is_empty():
+        cost, state = fringe.pop()  # pop a state from the fringe
+
+        if count_inversions(state) == 0:  # if a goal state is achieved
+            print('we found a goal state!!!')
+
+            # backtrack through the parents array to determine the sequence of moves taken to arrive at the goal state
+            # and then return the reverse of that sequence
+            tiles = []
+            while parents[tuple(state)] is not None:
+                tiles.append(parents[tuple(state)][1])
+                state = parents[tuple(state)][0]
+
+            print('nodes expanded: ' + str(nodes_expanded))
+            return tiles[::-1]
+
+        # expand the nodes of every successor
+        for successor in get_successors(state):
+            successor_state, tile = successor[0], successor[1]
+
+            nodes_expanded += 1
+
+            # if the successor state has not been visited, add it to the fringe, parents dictionary, and visited set
+            if tuple(successor_state) not in visited:
+                parents[tuple(successor_state)] = (tuple(state), tile)
+                visited.add(tuple(successor_state))
+                fringe.push((get_depth(successor_state, parents) + heuristic(successor_state), successor_state))
 
 
 # main
@@ -248,8 +314,14 @@ def main():
             move_tile(board_state, tile)
         except ValueError:  # catch the error if the user input cannot be parsed as a string
             if user_input == 'ai help':  # if user wants ai help
-                print('ai help: enter the sequence of tiles below to solve the puzzle')
-                print(bfs(board_state))
+
+                search_alg = input('search algorithm \"a_star\" or \"bfs\": ')
+                if search_alg == 'a_star':
+                    print('ai help: enter the sequence of tiles below to solve the puzzle')
+                    print(a_star(board_state))
+                elif search_alg == 'bfs':
+                    print('ai help: enter the sequence of tiles below to solve the puzzle')
+                    print(bfs(board_state))
             elif user_input == 'randomize':  # if user wants to randomize the board
                 randomize_board(board_state)
             elif user_input == 'sequence':  # if the user wants to enter a sequence of moves at once

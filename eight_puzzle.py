@@ -120,6 +120,12 @@ def move_tile(state, tile):
         print('illegal move')
 
 
+# move tiles in a sequence
+def move_tile_sequence(state, sequence):
+    for i in range(len(sequence)):
+        move_tile(state, sequence[i])
+
+
 # check to see if a tile is adjacent to the empty tile
 def adjacent_to_empty(state, tile):
     tile_index = state.index(tile)
@@ -216,8 +222,9 @@ def main():
 
     print('\ninstructions:')
     print('enter in a tile number to move that tile number into the empty space')
+    print('enter in \"sequence\" to enter in a sequence of tile moves')
     print('enter in \"ai help\" to have the ai return the tile sequence to solve the puzzle')
-    print('enter in \"randomize\" to randomize the puzzle')
+    print('enter in \"randomize\" to randomize the puzzle\n')
 
     randomize_board(board_state)
     while True:
@@ -238,11 +245,17 @@ def main():
                 print(bfs(board_state))
             elif user_input == 'randomize':
                 randomize_board(board_state)
+            elif user_input == 'sequence':
+                tiles = []
+                n = int(input('enter in the number of tiles in the sequence: '))
+
+                for i in range(n):
+                    tile = int(input())
+                    tiles.append(tile)
+
+                move_tile_sequence(board_state, tiles)
             else:
                 print('invalid input')
-
-
-
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@ from collections import deque
 from numpy import random
 
 # board state represented as a list
-board_state = [3, 1, 2, 4, 0, 5, 6, 7, 8]
+board_state = [3, 1, 2, 4, 0, 5, 6, 7, 8, -1]
 
 # dictionary to represent coordinate positions of the index of the board state array
 index_to_coordinates = {
@@ -16,6 +16,32 @@ index_to_coordinates = {
     7: (2, 1),
     8: (2, 2)
 }
+
+# dictionary to represent index of the board state array by the coordinates of the terminal board abstraction
+coordinates_to_index = {
+    (-1, 0): 9,
+    (-1, 1): 9,
+    (-1, 2): 9,
+    (0, -1): 9,
+    (0, 0): 0,
+    (0, 1): 1,
+    (0, 2): 2,
+    (0, 3): 9,
+    (1, -1): 9,
+    (1, 0): 3,
+    (1, 1): 4,
+    (1, 2): 5,
+    (1, 3): 9,
+    (2, -1): 9,
+    (2, 0): 6,
+    (2, 1): 7,
+    (2, 2): 8,
+    (2, 3): 9,
+    (3, 0): 9,
+    (3, 1): 9,
+    (3, 2): 9
+}
+
 
 
 # print board
@@ -35,12 +61,10 @@ def print_board(board_state):
 
 # count the number of inversions
 def count_inversions(board_state):
-    count = 0
     tiles = []
     for i in range(len(board_state)):
         if board_state[i] != 0:
             tiles.append(board_state[i])
-            count += 1
 
     inversions = 0
     for i in range(len(tiles)):
@@ -63,63 +87,8 @@ def randomize_board(board_state):
             break
 
 
-# find the next move to reach the goal state
-def find_move(board_state):
-    fringe = deque()
-
-    fringe.append(board_state)
-    while True:
-        state = fringe.popleft()
-
-        if count_inversions(state) == 0:
-            print('goal state reached from inside find move')
-            print(board_state)
-            break
-
-        # find the empty tile coordinates
-        for i in range(len(state)):
-            if state[i] == 0:
-                empty_index = i
-                empty_row, empty_column = index_to_coordinates.get(i)
-                break
-
-        for i in range(len(state)):
-
-            if state[i] != 0:
-                row, column = index_to_coordinates.get(i)
-
-                if empty_row == row - 1 and empty_column == column:
-                    copy_state = []
-                    copy_states(state, copy_state)
-                    move(copy_state, empty_index, i)
-                    # print('state: ' + str(state))
-                    # print('copy state: ' + str(copy_state))
-                    fringe.append(copy_state)
-                elif empty_row == row + 1 and empty_column == column:
-                    copy_state = []
-                    copy_states(state, copy_state)
-                    move(copy_state, empty_index, i)
-                    # print('state: ' + str(state))
-                    # print('copy state: ' + str(copy_state))
-                    fringe.append(copy_state)
-                elif empty_row == row and empty_column == column - 1:
-                    copy_state = []
-                    copy_states(state, copy_state)
-                    move(copy_state, empty_index, i)
-                    # print('state: ' + str(state))
-                    # print('copy state: ' + str(copy_state))
-                    fringe.append(copy_state)
-                elif empty_row == row and empty_column == column + 1:
-                    copy_state = []
-                    copy_states(state, copy_state)
-                    move(copy_state, empty_index, i)
-                    # print('state: ' + str(state))
-                    # print('copy state: ' + str(copy_state))
-                    fringe.append(copy_state)
-
-
-# move a tile to the empty tile
-def move(state, empty_index, index):
+# move a tile to the empty tile using array indices
+def move_index(state, empty_index, index):
     state[empty_index] = state[index]
     state[index] = 0
 
@@ -130,18 +99,59 @@ def copy_states(state, copy_state):
         copy_state.append(state[i])
 
 
+# move a tile into a coordinate position
+def move_tile(state, tile):
+    adjacent = adjacent_to_empty(state, tile)
+
+    if adjacent is not 'not':
+        tile_index = state.index(tile)
+        row, column = index_to_coordinates.get(tile_index)
+
+        if adjacent is 'above':
+            empty_index = coordinates_to_index.get((row + 1, column))
+            move_index(state, empty_index, tile_index)
+        elif adjacent is 'below':
+            empty_index = coordinates_to_index.get((row - 1, column))
+            move_index(state, empty_index, tile_index)
+        elif adjacent is 'left':
+            empty_index = coordinates_to_index.get((row, column + 1))
+            move_index(state, empty_index, tile_index)
+        elif adjacent is 'right':
+            empty_index = coordinates_to_index.get((row, column - 1))
+            move_index(state, empty_index, tile_index)
+    else:
+        print('illegal move')
+
+
+
+# check to see if a tile is adjacent to the empty tile
+def adjacent_to_empty(state, tile):
+    tile_index = state.index(tile)
+
+    row, column = index_to_coordinates.get(tile_index)
+
+    if state[coordinates_to_index.get((row + 1, column))] == 0:
+        return 'above'
+    elif state[coordinates_to_index.get((row - 1, column))] == 0:
+        return 'below'
+    elif state[coordinates_to_index.get((row, column + 1))] == 0:
+        return 'left'
+    elif state[coordinates_to_index.get((row, column - 1))] == 0:
+        return 'right'
+    else:
+        return 'not'
+
 # main
 def main():
-    randomize_board(board_state)
-    print_board(board_state)
-    print(count_inversions(board_state))
+    while True:
+        print_board(board_state)
 
-    # check for goal state
-    if count_inversions(board_state) == 0:
-        print('goal state reached')
+        if count_inversions(board_state) == 0:
+            print('you won!')
+            break
 
-    find_move(board_state)
-
+        tile = input('move a tile: ')
+        move_tile(board_state, int(tile))
 
 if __name__ == "__main__":
     main()

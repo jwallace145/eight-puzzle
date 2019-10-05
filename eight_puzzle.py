@@ -1,8 +1,10 @@
-from collections import deque
-from numpy import random
+# import necessary modules
+from collections import deque  # data structure of the fringe for bfs
+from numpy import random  # random module used to generate permutations of lists for randomizing the puzzle
 
 # board state represented as a list
-board_state = [0, 3, 2, 4, 1, 5, 8, 6, 7, -1]
+# 0 represents the empty tile and -1 represents the boundaries of the puzzle
+board_state = [4, 6, 3, 0, 7, 1, 8, 2, 5, -1]
 
 # dictionary to represent coordinate positions of the index of the board state array
 index_to_coordinates = {
@@ -17,7 +19,7 @@ index_to_coordinates = {
     8: (2, 2),
 }
 
-# dictionary to represent index of the board state array by the coordinates of the terminal board abstraction
+# dictionary to represent indices of the board state array of the coordinates of the board
 coordinates_to_index = {
     (-1, 0): 9,
     (-1, 1): 9,
@@ -62,7 +64,7 @@ def print_board(state):
 def count_inversions(state):
     tiles = []
     for i in range(len(state)):
-        if state[i] != 0 and state[i] != -1:
+        if state[i] != 0 and state[i] != -1:  # exclude 0 and -1 because these are not "tiles"
             tiles.append(state[i])
 
     inversions = 0
@@ -79,8 +81,10 @@ def randomize_board(state):
     while True:
         tiles = random.permutation(9)
 
-        for i in range(len(state)):
+        for i in range(len(state) - 1):
             board_state[i] = tiles[i]
+
+        board_state[9] = -1  # the last element of the board state array represents the boundaries of the board
 
         if count_inversions(state) % 2 == 0:
             break
@@ -169,9 +173,6 @@ def bfs(state):
         s = fringe.popleft()
         visited.add(tuple(s))
 
-        print_board(s)
-        print()
-
         if count_inversions(s) == 0:
             print('we found a goal state!!!!')
             break
@@ -186,12 +187,14 @@ def bfs(state):
 # main
 def main():
     print_board(board_state)
+    print(count_inversions(board_state))
 
+    randomize_board(board_state)
+
+    print_board(board_state)
+    print(count_inversions(board_state))
 
     bfs(board_state)
-
-    tile = input('move a tile: ')
-    move_tile(board_state, int(tile))
 
 
 if __name__ == "__main__":

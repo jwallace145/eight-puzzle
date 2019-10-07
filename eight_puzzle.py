@@ -281,6 +281,7 @@ def a_star(initial_state):
             if tuple(successor_state) not in visited:
                 parents[tuple(successor_state)] = (tuple(state), tile)
                 visited.add(tuple(successor_state))
+
                 # the priority of the state = depth of the state + heuristic value of the state
                 # this priority queue is implemented as a minimum priority queue so low value heuristics are desirable
                 fringe.push((get_depth(successor_state, parents) + heuristic(successor_state), successor_state))
